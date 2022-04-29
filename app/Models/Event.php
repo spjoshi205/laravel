@@ -25,7 +25,10 @@ class Event extends Model
     public function startedEvent()
     {
         return self::join('workshops', 'events.id', '=', 'workshops.event_id')
-        ->where('workshops.start', '>=', '2021-10-21 10:00:00');
+        ->where('workshops.start', '>=', '2021-08-21 09:00:00')
+        ->select('events.*')
+        ->groupBy('events.id');
+        
     }
 
 }

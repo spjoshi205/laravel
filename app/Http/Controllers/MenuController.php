@@ -95,6 +95,35 @@ class MenuController extends BaseController
      */
 
     public function getMenuItems() {
-        throw new \Exception('implement in coding task 3');
+		$menuItems = MenuItem::
+		//leftJoin('menu_items as m2', 'm2.parent_id', '=', 'menu_items.id')
+		get()
+		->toArray();
+		$response = [];
+		$menuWithPatentId = [];
+			foreach($menuItems as $key => $menuItem){
+					$menuWithPatentId[$menuItem['id']] = $menuItem;
+			}
+			$menu = [];
+			foreach($menuWithPatentId as $key => $menuWithPatentdata){
+				if($menuWithPatentdata['parent_id'] != null){
+					if(empty($menuWithPatentId[$menuWithPatentdata['parent_id']]['children'])){
+						$menuWithPatentId[$menuWithPatentdata['parent_id']]['children'] = [];
+					}
+					$menuWithPatentId[$menuWithPatentdata['parent_id']]['children'][] = $menuWithPatentdata;
+					unset($menuWithPatentId[$menuWithPatentdata['id']]);
+				}
+			}
+			foreach($menuWithPatentId as $key => $menuWithPatentdata){
+				if(!empty($menuWithPatentdata['id'])){
+					foreach($menuWithPatentdata['children'] as $ckey => $child){
+						$menuWithPatentdata["children"][$ckey]["children"] = array_values($menuWithPatentId[$child['id']]["children"]);
+						$menuWithPatentId[$key] = $menuWithPatentdata;
+						unset($menuWithPatentId[$child['id']]);
+					}
+				}
+			}
+			$menuWithPatentId = array_values($menuWithPatentId);
+			return \Response::json($menuWithPatentId);
     }
 }
